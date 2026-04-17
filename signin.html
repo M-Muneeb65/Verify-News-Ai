@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — VerifyAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="auth.css">
+<style>
+@keyframes orbF{0%{transform:translate(0,0) scale(1)}25%{transform:translate(40px,-60px) scale(1.08)}50%{transform:translate(-30px,40px) scale(.95)}75%{transform:translate(60px,30px) scale(1.05)}100%{transform:translate(0,0) scale(1)}}
+nav,form,.auth-card,.modal-box { position:relative; z-index:10; }
+.btn-hero-primary,.btn-solid-sm { background:linear-gradient(135deg,#5b52f0,#7c6ff5,#5b52f0) !important; background-size:200% !important; animation:gS 4s ease infinite !important; box-shadow:0 0 24px rgba(91,82,240,.4),0 4px 15px rgba(0,0,0,.3) !important; transition:transform .2s,box-shadow .2s !important; }
+.btn-hero-primary:hover,.btn-solid-sm:hover { transform:translateY(-2px) scale(1.02) !important; box-shadow:0 0 40px rgba(91,82,240,.6),0 8px 25px rgba(0,0,0,.4) !important; }
+@keyframes gS{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+input:focus,textarea:focus { box-shadow:0 0 0 3px rgba(91,82,240,.15),0 0 20px rgba(91,82,240,.12) !important; border-color:#5b52f0 !important; }
+::-webkit-scrollbar{width:5px} ::-webkit-scrollbar-thumb{background:rgba(91,82,240,.3);border-radius:99px}
+::selection{background:rgba(91,82,240,.35);color:#fff}
+</style>
+</head>
+<body>
+
+<!-- ANIMATED BG -->
+<canvas id="bg-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.5"></canvas>
+<div style="position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden">
+  <div style="position:absolute;width:700px;height:700px;border-radius:50%;filter:blur(100px);background:radial-gradient(circle,rgba(91,82,240,0.16) 0%,transparent 70%);top:-200px;left:-200px;animation:orbF 22s linear infinite"></div>
+  <div style="position:absolute;width:500px;height:500px;border-radius:50%;filter:blur(90px);background:radial-gradient(circle,rgba(139,127,248,0.12) 0%,transparent 70%);top:40%;right:-150px;animation:orbF 28s linear infinite reverse"></div>
+  <div style="position:absolute;width:400px;height:400px;border-radius:50%;filter:blur(80px);background:radial-gradient(circle,rgba(14,165,233,0.09) 0%,transparent 70%);bottom:-100px;left:40%;animation:orbF 20s linear infinite -10s"></div>
+</div>
+<div style="position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(91,82,240,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(91,82,240,0.03) 1px,transparent 1px);background-size:60px 60px"></div>
+
+<div class="glow"></div>
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="logo-mark">V</div>
+    <span class="logo-name">VerifyAI</span>
+  </a>
+  <div class="nav-right">No account? <a href="signup.html">Sign up free</a></div>
+</nav>
+<main>
+  <div class="card">
+    <div class="card-icon">🔐</div>
+    <div class="card-title">Welcome back</div>
+    <div class="card-sub">Sign in to your VerifyAI account.</div>
+
+    <div class="error-box" id="err-box"></div>
+
+    <div class="form-group">
+      <label class="form-label">Email address</label>
+      <input class="form-input" type="email" id="email" placeholder="you@example.com" autocomplete="email">
+      <div class="field-err" id="err-email">Enter your email</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" style="display:flex;justify-content:space-between">
+        <span>Password</span>
+        <a href="#" style="color:#a5a0f8;text-decoration:none;font-size:11px;font-weight:500;text-transform:none;letter-spacing:0">Forgot password?</a>
+      </label>
+      <div class="pw-wrap">
+        <input class="form-input" type="password" id="pw" placeholder="Your password" autocomplete="current-password">
+        <button type="button" class="pw-eye" onclick="togglePw()" tabindex="-1">👁</button>
+      </div>
+      <div class="field-err" id="err-pw">Enter your password</div>
+    </div>
+
+    <div style="margin-bottom:18px">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="remember" style="accent-color:#5b52f0;width:14px;height:14px">
+        <span style="font-size:13px;color:#7c7c9a;font-weight:500">Remember me</span>
+      </label>
+    </div>
+
+    <button class="btn-submit" id="sub-btn" onclick="doSignin()">
+      <span id="sub-lbl">Sign in →</span>
+    </button>
+
+    <div class="divider">or</div>
+
+    <button class="btn-google" onclick="googleAuth()">
+      <div class="g-icon">G</div>
+      Continue with Google
+    </button>
+
+    <div class="alt-link">Don't have an account? <a href="signup.html">Create one free</a></div>
+  </div>
+</main>
+
+<script>
+function togglePw() {
+  const el = document.getElementById('pw');
+  const btn = document.querySelector('.pw-eye');
+  el.type = el.type === 'password' ? 'text' : 'password';
+  btn.textContent = el.type === 'password' ? '👁' : '🙈';
+}
+
+function doSignin() {
+  document.getElementById('err-email').style.display = 'none';
+  document.getElementById('err-pw').style.display = 'none';
+  document.getElementById('err-box').style.display = 'none';
+
+  const email = document.getElementById('email').value.trim();
+  const pw    = document.getElementById('pw').value;
+
+  let ok = true;
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    document.getElementById('err-email').style.display = 'block'; ok = false;
+  }
+  if (!pw) {
+    document.getElementById('err-pw').style.display = 'block'; ok = false;
+  }
+  if (!ok) return;
+
+  const btn = document.getElementById('sub-btn');
+  btn.disabled = true;
+  document.getElementById('sub-lbl').textContent = 'Signing in…';
+
+  // Accept any valid email+password (demo mode — works without a backend)
+  // If they previously signed up, use their name; otherwise derive from email
+  let user = JSON.parse(localStorage.getItem('vai_user') || 'null');
+  if (!user || user.email !== email) {
+    // New login — create a session from the email
+    const name = email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    user = { name, fullName: name, email, created: new Date().toISOString() };
+    localStorage.setItem('vai_user', JSON.stringify(user));
+  }
+  localStorage.setItem('vai_logged', '1');
+
+  setTimeout(() => { window.location.href = 'app.html'; }, 900);
+}
+
+function googleAuth() {
+  const user = { name: 'Google User', fullName: 'Google User', email: 'user@gmail.com', created: new Date().toISOString() };
+  localStorage.setItem('vai_user', JSON.stringify(user));
+  localStorage.setItem('vai_logged', '1');
+  const btn = document.querySelector('.btn-google');
+  btn.disabled = true;
+  btn.textContent = 'Connecting…';
+  setTimeout(() => { window.location.href = 'app.html'; }, 800);
+}
+</script>
+
+<script>
+(function() {
+  var canvas = document.getElementById('bg-canvas');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var W, H, particles = [];
+  var COLORS = ['rgba(91,82,240,', 'rgba(139,127,248,', 'rgba(14,165,233,'];
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  function Particle() {
+    this.x = Math.random()*W; this.y = Math.random()*H;
+    this.vx = (Math.random()-.5)*.4; this.vy = (Math.random()-.5)*.4;
+    this.r = Math.random()*1.6+.4;
+    this.col = COLORS[Math.floor(Math.random()*COLORS.length)];
+    this.life = Math.random()*.5+.3; this.pulse = Math.random()*Math.PI*2;
+  }
+  Particle.prototype.update = function() {
+    this.x+=this.vx; this.y+=this.vy; this.pulse+=.02;
+    if(this.x<0)this.x=W; if(this.x>W)this.x=0;
+    if(this.y<0)this.y=H; if(this.y>H)this.y=0;
+  };
+  Particle.prototype.draw = function() {
+    var a=this.life*(0.6+0.4*Math.sin(this.pulse));
+    ctx.beginPath(); ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+    ctx.fillStyle=this.col+a+')'; ctx.fill();
+  };
+  function init() {
+    resize(); particles=[];
+    var count=Math.min(Math.floor(W*H/15000),70);
+    for(var i=0;i<count;i++) particles.push(new Particle());
+  }
+  function drawLines() {
+    var maxDist=120;
+    for(var i=0;i<particles.length;i++) for(var j=i+1;j<particles.length;j++) {
+      var dx=particles[i].x-particles[j].x, dy=particles[i].y-particles[j].y;
+      var d=Math.sqrt(dx*dx+dy*dy);
+      if(d<maxDist) {
+        ctx.beginPath(); ctx.moveTo(particles[i].x,particles[i].y);
+        ctx.lineTo(particles[j].x,particles[j].y);
+        ctx.strokeStyle='rgba(91,82,240,'+(1-d/maxDist)*.15+')';
+        ctx.lineWidth=.5; ctx.stroke();
+      }
+    }
+  }
+  function loop() { ctx.clearRect(0,0,W,H); particles.forEach(function(p){p.update();p.draw();}); drawLines(); requestAnimationFrame(loop); }
+  window.addEventListener('resize',init); init(); loop();
+  document.addEventListener('click',function(e){
+    var btn=e.target.closest('button,a.btn-hero-primary,a.btn-solid-sm,.btn-ghost-sm');
+    if(!btn)return;
+    var r=btn.getBoundingClientRect();
+    var rip=document.createElement('span');
+    rip.style.cssText='position:absolute;border-radius:50%;background:rgba(255,255,255,0.2);pointer-events:none;transform:scale(0);animation:rA .5s ease-out forwards;width:180px;height:180px;left:'+(e.clientX-r.left-90)+'px;top:'+(e.clientY-r.top-90)+'px;z-index:9';
+    if(!document.getElementById('rAS')){var s=document.createElement('style');s.id='rAS';s.textContent='@keyframes rA{to{transform:scale(3);opacity:0}}';document.head.appendChild(s);}
+    btn.style.position='relative'; btn.style.overflow='hidden';
+    btn.appendChild(rip); setTimeout(function(){rip.remove();},550);
+  });
+  var glow=document.createElement('div');
+  glow.style.cssText='position:fixed;pointer-events:none;z-index:99999;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(91,82,240,0.07) 0%,transparent 70%);transform:translate(-50%,-50%);transition:left .08s,top .08s;left:-999px;top:-999px';
+  document.body.appendChild(glow);
+  document.addEventListener('mousemove',function(e){glow.style.left=e.clientX+'px';glow.style.top=e.clientY+'px';});
+})();
+</script>
+
+</body>
+</html>
